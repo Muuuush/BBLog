@@ -16,6 +16,7 @@ int main()
         error("{}", str);
         fatal("{}", str);
     }
+    targetStream = &cerr;
     bb::showTime = true;
     colorBB = false;
     for (int i = (int)ELevel::TRACE; i <= (int)ELevel::NONE; i++)

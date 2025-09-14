@@ -5,6 +5,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <sstream>
 #if __cplusplus >= 202002L // C++20
 #include <format>
 #endif
@@ -42,6 +43,11 @@ inline constexpr const char* COLOR_LEVEL_LABEL[] = {
     "\e[01;41mFATAL\e[00m",
 };
 
+// For c++20 or newer stdardard
+inline ostream* targetStream = &cout;
+// For c++17 or older stdardard
+inline FILE* targetFile = stdout;
+
 #if defined(DEBUG) || defined(_DEBUG) || defined(Debug)
 inline ELevel level = ELevel::DEBUG;
 #else
@@ -56,14 +62,19 @@ inline void StdFormatBB(const string_view& label, const string_view& fmt, Args&&
 {
     if (showTime)
     {
-        cout << format("[{}] {:%F %X}: ", label, system_clock::now());
+        (*targetStream) << format("[{}] {:%F %X}: ", label, system_clock::now());
     }
     else
     {
-        cout << format("[{}]: ", label);
+        (*targetStream) << format("[{}]: ", label);
     }
-    cout << vformat(fmt, make_format_args(forward<Args>(args)...));
-    cout << endl;
+    (*targetStream) << vformat(fmt, make_format_args(forward<Args>(args)...));
+    (*targetStream) << endl;
+}
+template <typename... Args>
+inline void StdFormatBB(ELevel level, const string_view& fmt, Args&&... args)
+{
+    StdFormatBB(LEVEL_LABEL[static_cast<int>(level)], fmt, forward<Args>(args)...);
 }
 #endif
 
@@ -74,14 +85,21 @@ inline void CFormatBB(const string_view& label, const string_view& fmt, Args&&..
     {
         time_t t = system_clock::to_time_t(system_clock::now());
         tm* tm = localtime(&t);
-        cout << "[" << label << "] " << put_time(tm, "%D %X") << ": ";
+        stringstream ss;
+        ss << "[" << label << "] " << put_time(tm, "%D %X") << ": ";
+        fprintf(targetFile, ss.str().c_str());
     }
     else
     {
-        cout << "[" << label << "] ";
+        fprintf(targetFile, "[%s]: ", label.data());
     }
-    printf(fmt.data(), forward<Args>(args)...);
-    cout << endl;
+    fprintf(targetFile, fmt.data(), forward<Args>(args)...);
+    fprintf(targetFile, "\n");
+}
+template <typename... Args>
+inline void CFormatBB(ELevel level, const string_view& fmt, Args&&... args)
+{
+    CFormatBB(LEVEL_LABEL[static_cast<int>(level)], fmt, forward<Args>(args)...);
 }
 
 // Use C style while using c++17 or older stdardard;
@@ -102,10 +120,17 @@ template <typename... Args>
 inline void BB(ELevel level, const string_view& fmt, Args&&... args)
 {
     if (level < bb::level) return;
+#if __cplusplus >= 202002L
     if (colorBB)
-        BB(COLOR_LEVEL_LABEL[static_cast<int>(level)], fmt, forward<Args>(args)...);
+        StdFormatBB(COLOR_LEVEL_LABEL[static_cast<int>(level)], fmt, forward<Args>(args)...);
     else
-        BB(LEVEL_LABEL[static_cast<int>(level)], fmt, forward<Args>(args)...);
+        StdFormatBB(LEVEL_LABEL[static_cast<int>(level)], fmt, forward<Args>(args)...);
+#else
+    if (colorBB)
+        CFormatBB(COLOR_LEVEL_LABEL[static_cast<int>(level)], fmt, forward<Args>(args)...);
+    else
+        CFormatBB(LEVEL_LABEL[static_cast<int>(level)], fmt, forward<Args>(args)...);
+#endif
 };
 
 template <typename... Args> inline void trace(const string_view& fmt, Args&&... args) { BB(ELevel::TRACE, fmt, forward<Args>(args)...); }

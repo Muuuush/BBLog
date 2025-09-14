@@ -16,6 +16,7 @@ int main()
         error("%s", str.c_str());
         fatal("%s", str.c_str());
     }
+    targetFile = stderr;
     showTime = true;
     colorBB = false;
     for (int i = (int)ELevel::TRACE; i <= (int)ELevel::NONE; i++)
