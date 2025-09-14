@@ -1,2 +1,2 @@
-# BB_Log
+# BBLog
 Single header log library
