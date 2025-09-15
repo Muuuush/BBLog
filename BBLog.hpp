@@ -4,10 +4,14 @@
 #define __BB_LOGER__
 
 #include <chrono>
-#include <iostream>
-#include <sstream>
+#include <optional>
 #if __cplusplus >= 202002L // C++20
 #include <format>
+#include <fstream>
+#include <iostream>
+#else
+#include <sstream>
+#include <cstdio>
 #endif
 
 namespace bb
@@ -43,10 +47,45 @@ inline constexpr const char* COLOR_LEVEL_LABEL[] = {
     "\e[01;41mFATAL\e[00m",
 };
 
+inline optional<string> targetFile = nullopt;
+#if __cplusplus >= 202002L
 // For c++20 or newer stdardard
-inline ostream* targetStream = &cout;
+inline ostream* target = &cout;
+#else
 // For c++17 or older stdardard
-inline FILE* targetFile = stdout;
+inline FILE* target = stdout;
+#endif
+
+// Return true if success
+inline bool setTarget(const string& file)
+{
+    targetFile = file;
+#if __cplusplus >= 202002L
+    try
+    {
+        target = new ofstream(file, ios::app);
+    }
+    catch (const exception& e)
+    {
+        return false;
+    }
+    return true;
+#else
+    target = fopen(file.c_str(), "a");
+    return target != nullptr;
+#endif
+}
+inline void resetTarget()
+{
+    targetFile = nullopt;
+#if __cplusplus >= 202002L
+    static_cast<ofstream*>(target)->close();
+    target = &cout;
+#else
+    fclose(target);
+    target = stdout;
+#endif
+}
 
 #if defined(DEBUG) || defined(_DEBUG) || defined(Debug)
 inline ELevel level = ELevel::DEBUG;
@@ -62,22 +101,22 @@ inline void StdFormatBB(const string_view& label, const string_view& fmt, Args&&
 {
     if (showTime)
     {
-        (*targetStream) << format("[{}] {:%F %X}: ", label, system_clock::now());
+        (*target) << format("[{}] {:%F %X}: ", label, system_clock::now());
     }
     else
     {
-        (*targetStream) << format("[{}]: ", label);
+        (*target) << format("[{}]: ", label);
     }
-    (*targetStream) << vformat(fmt, make_format_args(forward<Args>(args)...));
-    (*targetStream) << endl;
+    (*target) << vformat(fmt, make_format_args(forward<Args>(args)...));
+    (*target) << endl;
 }
 template <typename... Args>
 inline void StdFormatBB(ELevel level, const string_view& fmt, Args&&... args)
 {
     StdFormatBB(LEVEL_LABEL[static_cast<int>(level)], fmt, forward<Args>(args)...);
 }
-#endif
 
+#else
 template <typename... Args>
 inline void CFormatBB(const string_view& label, const string_view& fmt, Args&&... args)
 {
@@ -87,20 +126,22 @@ inline void CFormatBB(const string_view& label, const string_view& fmt, Args&&..
         tm* tm = localtime(&t);
         stringstream ss;
         ss << "[" << label << "] " << put_time(tm, "%D %X") << ": ";
-        fprintf(targetFile, ss.str().c_str());
+        fprintf(target, ss.str().c_str());
     }
     else
     {
-        fprintf(targetFile, "[%s]: ", label.data());
+        fprintf(target, "[%s]: ", label.data());
     }
-    fprintf(targetFile, fmt.data(), forward<Args>(args)...);
-    fprintf(targetFile, "\n");
+    fprintf(target, fmt.data(), forward<Args>(args)...);
+    fprintf(target, "\n");
+    fflush(target);
 }
 template <typename... Args>
 inline void CFormatBB(ELevel level, const string_view& fmt, Args&&... args)
 {
     CFormatBB(LEVEL_LABEL[static_cast<int>(level)], fmt, forward<Args>(args)...);
 }
+#endif
 
 // Use C style while using c++17 or older stdardard;
 // Use std::format style while using c++20 or newer stdardard.
