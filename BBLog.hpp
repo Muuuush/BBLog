@@ -10,8 +10,8 @@
 #include <fstream>
 #include <iostream>
 #else
-#include <sstream>
 #include <cstdio>
+#include <sstream>
 #endif
 
 namespace bb
@@ -107,13 +107,13 @@ inline void StdFormatBB(const string_view& label, const string_view& fmt, Args&&
     {
         (*target) << format("[{}]: ", label);
     }
-    (*target) << vformat(fmt, make_format_args(forward<Args>(args)...));
+    (*target) << vformat(fmt, make_format_args(args...));
     (*target) << endl;
 }
 template <typename... Args>
 inline void StdFormatBB(ELevel level, const string_view& fmt, Args&&... args)
 {
-    StdFormatBB(LEVEL_LABEL[static_cast<int>(level)], fmt, forward<Args>(args)...);
+    StdFormatBB(LEVEL_LABEL[static_cast<int>(level)], fmt, args...);
 }
 
 #else
@@ -132,14 +132,14 @@ inline void CFormatBB(const string_view& label, const string_view& fmt, Args&&..
     {
         fprintf(target, "[%s]: ", label.data());
     }
-    fprintf(target, fmt.data(), forward<Args>(args)...);
+    fprintf(target, fmt.data(), args...);
     fprintf(target, "\n");
     fflush(target);
 }
 template <typename... Args>
 inline void CFormatBB(ELevel level, const string_view& fmt, Args&&... args)
 {
-    CFormatBB(LEVEL_LABEL[static_cast<int>(level)], fmt, forward<Args>(args)...);
+    CFormatBB(LEVEL_LABEL[static_cast<int>(level)], fmt, args...);
 }
 #endif
 
@@ -149,9 +149,9 @@ template <typename... Args>
 inline void BB(const string_view& label, const string_view& fmt, Args&&... args)
 {
 #if __cplusplus >= 202002L
-    StdFormatBB(label, fmt, forward<Args>(args)...);
+    StdFormatBB(label, fmt, args...);
 #else
-    CFormatBB(label, fmt, forward<Args>(args)...);
+    CFormatBB(label, fmt, args...);
 #endif
 }
 
@@ -163,23 +163,23 @@ inline void BB(ELevel level, const string_view& fmt, Args&&... args)
     if (level < bb::level) return;
 #if __cplusplus >= 202002L
     if (colorBB)
-        StdFormatBB(COLOR_LEVEL_LABEL[static_cast<int>(level)], fmt, forward<Args>(args)...);
+        StdFormatBB(COLOR_LEVEL_LABEL[static_cast<int>(level)], fmt, args...);
     else
-        StdFormatBB(LEVEL_LABEL[static_cast<int>(level)], fmt, forward<Args>(args)...);
+        StdFormatBB(LEVEL_LABEL[static_cast<int>(level)], fmt, args...);
 #else
     if (colorBB)
-        CFormatBB(COLOR_LEVEL_LABEL[static_cast<int>(level)], fmt, forward<Args>(args)...);
+        CFormatBB(COLOR_LEVEL_LABEL[static_cast<int>(level)], fmt, args...);
     else
-        CFormatBB(LEVEL_LABEL[static_cast<int>(level)], fmt, forward<Args>(args)...);
+        CFormatBB(LEVEL_LABEL[static_cast<int>(level)], fmt, args...);
 #endif
 };
 
-template <typename... Args> inline void trace(const string_view& fmt, Args&&... args) { BB(ELevel::TRACE, fmt, forward<Args>(args)...); }
-template <typename... Args> inline void debug(const string_view& fmt, Args&&... args) { BB(ELevel::DEBUG, fmt, forward<Args>(args)...); }
-template <typename... Args> inline void log(const string_view& fmt, Args&&... args) { BB(ELevel::LOG, fmt, forward<Args>(args)...); }
-template <typename... Args> inline void warn(const string_view& fmt, Args&&... args) { BB(ELevel::WARN, fmt, forward<Args>(args)...); }
-template <typename... Args> inline void error(const string_view& fmt, Args&&... args) { BB(ELevel::ERROR, fmt, forward<Args>(args)...); }
-template <typename... Args> inline void fatal(const string_view& fmt, Args&&... args) { BB(ELevel::FATAL, fmt, forward<Args>(args)...); }
+template <typename... Args> inline void trace(const string_view& fmt, Args&&... args) { BB(ELevel::TRACE, fmt, args...); }
+template <typename... Args> inline void debug(const string_view& fmt, Args&&... args) { BB(ELevel::DEBUG, fmt, args...); }
+template <typename... Args> inline void log(const string_view& fmt, Args&&... args) { BB(ELevel::LOG, fmt, args...); }
+template <typename... Args> inline void warn(const string_view& fmt, Args&&... args) { BB(ELevel::WARN, fmt, args...); }
+template <typename... Args> inline void error(const string_view& fmt, Args&&... args) { BB(ELevel::ERROR, fmt, args...); }
+template <typename... Args> inline void fatal(const string_view& fmt, Args&&... args) { BB(ELevel::FATAL, fmt, args...); }
 
 } // namespace bb
 
