@@ -6,7 +6,7 @@ using namespace bb;
 int main()
 {
     const std::string str = "test format";
-    for (int i = (int)ELevel::TRACE; i <= (int)ELevel::NONE; i++)
+    for (int i = (int)ELevel::E_TRACE; i <= (int)ELevel::E_NONE; i++)
     {
         level = static_cast<ELevel>(i);
         trace("%s", str.c_str());
@@ -19,7 +19,7 @@ int main()
     targetFile = stderr;
     showTime = true;
     colorBB = false;
-    for (int i = (int)ELevel::TRACE; i <= (int)ELevel::NONE; i++)
+    for (int i = (int)ELevel::E_TRACE; i <= (int)ELevel::E_NONE; i++)
     {
         level = static_cast<ELevel>(i);
         trace("%s", str.c_str());

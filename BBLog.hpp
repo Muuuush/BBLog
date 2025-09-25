@@ -22,13 +22,13 @@ using namespace std::chrono;
 
 enum class ELevel
 {
-    TRACE,
-    DEBUG,
-    LOG,
-    WARN,
-    ERROR,
-    FATAL,
-    NONE
+    E_TRACE,
+    E_DEBUG,
+    E_LOG,
+    E_WARN,
+    E_ERROR,
+    E_FATAL,
+    E_NONE
 };
 inline constexpr const char* LEVEL_LABEL[] = {
     "TRACE",
@@ -90,7 +90,7 @@ inline void resetTarget()
 #if defined(DEBUG) || defined(_DEBUG) || defined(Debug)
 inline ELevel level = ELevel::DEBUG;
 #else
-inline ELevel level = ELevel::LOG;
+inline ELevel level = ELevel::E_LOG;
 #endif
 inline bool colorBB = true;
 inline bool showTime = false;
@@ -174,12 +174,12 @@ inline void BB(ELevel level, const string_view& fmt, Args&&... args)
 #endif
 };
 
-template <typename... Args> inline void trace(const string_view& fmt, Args&&... args) { BB(ELevel::TRACE, fmt, args...); }
-template <typename... Args> inline void debug(const string_view& fmt, Args&&... args) { BB(ELevel::DEBUG, fmt, args...); }
-template <typename... Args> inline void log(const string_view& fmt, Args&&... args) { BB(ELevel::LOG, fmt, args...); }
-template <typename... Args> inline void warn(const string_view& fmt, Args&&... args) { BB(ELevel::WARN, fmt, args...); }
-template <typename... Args> inline void error(const string_view& fmt, Args&&... args) { BB(ELevel::ERROR, fmt, args...); }
-template <typename... Args> inline void fatal(const string_view& fmt, Args&&... args) { BB(ELevel::FATAL, fmt, args...); }
+template <typename... Args> inline void trace(const string_view& fmt, Args&&... args) { BB(ELevel::E_TRACE, fmt, args...); }
+template <typename... Args> inline void debug(const string_view& fmt, Args&&... args) { BB(ELevel::E_DEBUG, fmt, args...); }
+template <typename... Args> inline void log(const string_view& fmt, Args&&... args) { BB(ELevel::E_LOG, fmt, args...); }
+template <typename... Args> inline void warn(const string_view& fmt, Args&&... args) { BB(ELevel::E_WARN, fmt, args...); }
+template <typename... Args> inline void error(const string_view& fmt, Args&&... args) { BB(ELevel::E_ERROR, fmt, args...); }
+template <typename... Args> inline void fatal(const string_view& fmt, Args&&... args) { BB(ELevel::E_FATAL, fmt, args...); }
 
 } // namespace bb
 
