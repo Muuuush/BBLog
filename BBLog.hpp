@@ -88,7 +88,7 @@ inline void resetTarget()
 }
 
 #if defined(DEBUG) || defined(_DEBUG) || defined(Debug)
-inline ELevel level = ELevel::DEBUG;
+inline ELevel level = ELevel::E_DEBUG;
 #else
 inline ELevel level = ELevel::E_LOG;
 #endif
